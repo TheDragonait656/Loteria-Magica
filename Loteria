@@ -1,0 +1,190 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <string.h>
+#include <math.h>
+
+#define MAX_NUMEROS 1
+#define MAX_DIGITOS_PALE 2
+#define MAX_DIGITOS_TRIPLETA 3
+
+void jugar();
+void tirar(int numeros[], int *cantidadNumeros);
+void guardarEnArchivo(int numeros[], int cantidadNumeros, const char *tipoJuego);
+void mostrarHistorial(int numeros[], int cantidadNumeros);
+
+int main() {
+    int opcion;
+    int numeros[MAX_NUMEROS];
+    int cantidadNumeros = 0;
+
+    srand(time(NULL));
+
+    do {
+        printf("Menu\n\n");
+        printf("0 - Salir\n");
+        printf("1 - Tirar\n");
+        printf("2 - Imprimir\n");
+        printf("3 - Jugar\n");
+        printf("Elija una opcion: ");
+        scanf("%d", &opcion);
+
+        switch (opcion) {
+            case 0:
+                printf("Saliendo del programa.\n");
+                break;
+            case 1:
+                tirar(numeros, &cantidadNumeros);
+                break;
+            case 2:
+                printf("Imprimiendo...\n");
+                break;
+            case 3:
+                jugar();
+                break;
+            default:
+                printf("Escribe solo del 0 al 3.\n");
+                break;
+        }
+
+    } while (opcion != 0);
+
+    printf("\nResumen:\n");
+    printf("Cantidad de numeros generados: %d\n", cantidadNumeros);
+    printf("Numeros generados: ");
+    for (int i = 0; i < cantidadNumeros; i++) {
+        printf("%d ", numeros[i]);
+    }
+    printf("\n");
+
+    time_t t;
+    time(&t);
+    struct tm *tm_info = localtime(&t);
+
+    printf("\nFecha: %02d/%02d/%d\n", tm_info->tm_mday, tm_info->tm_mon + 1, tm_info->tm_year + 1900);
+    printf("Hora actual: %02d:%02d:%02d\n", tm_info->tm_hour, tm_info->tm_min, tm_info->tm_sec);
+
+    return 0;
+}
+
+void tirar(int numeros[], int *cantidadNumeros) {
+    printf("A ver que numero sale: %d\n", rand() % 99 + 1);
+}
+
+void jugar() {
+    int opcionJuego;
+    int cantidadDigitos;
+
+    do {
+        printf("\nSubmenu de Juego\n\n");
+        printf("0 - Volver al menu principal\n");
+        printf("1 - Numero (solo un digito)\n");
+        printf("2 - Pale (dos digitos)\n");
+        printf("3 - Tripleta (tres digitos)\n");
+        printf("A cual vas a jugar: ");
+        scanf("%d", &opcionJuego);
+
+        switch (opcionJuego) {
+            case 0:
+                printf("Volviendo al menu principal.\n");
+                break;
+            case 1:
+                cantidadDigitos = 1;
+                break;
+            case 2:
+                cantidadDigitos = 2;
+                break;
+            case 3:
+                cantidadDigitos = 3;
+                break;
+            default:
+                printf("Escribe solo del 1 a 3 digitos segun su eleccion.\n");
+                cantidadDigitos = -1;
+                break;
+        }
+    } while (cantidadDigitos == -1);
+
+
+    int numeroUsuario;
+    printf("Ingresa un numero de %d digito(s): ", cantidadDigitos);
+    scanf("%d", &numeroUsuario);
+
+    int longitudNumero = 1;
+    int temp = numeroUsuario;
+    while (temp >= 10) {
+        temp /= 10;
+        longitudNumero++;
+    }
+
+    if (longitudNumero == cantidadDigitos) {
+        int numeroAleatorio = rand() % (int)(pow(10, cantidadDigitos));
+
+        printf("Numero generado aleatoriamente: %d\n", numeroAleatorio);
+
+        if (numeroUsuario == numeroAleatorio) {
+            printf("Ganaste!! felicidades.\n");
+        } else {
+            printf("Jaa perdiste palomo.\n");
+        }
+
+        char tipoJuego[20];
+        switch (cantidadDigitos) {
+            case 1:
+                strcpy(tipoJuego, "Numero");
+                break;
+            case 2:
+                strcpy(tipoJuego, "Pale");
+                break;
+            case 3:
+                strcpy(tipoJuego, "Tripleta");
+                break;
+            default:
+                strcpy(tipoJuego, "Desconocido");
+                break;
+        }
+void guardarEnArchivo(int numeros[], int cantidadNumeros, const char *tipoJuego);
+    } else {
+        printf("Error: El número ingresado no tiene la cantidad correcta de digitos.\n");
+    }
+}
+
+void mostrarHistorial(int numeros[], int cantidadNumeros) {
+    FILE *archivo;
+    archivo = fopen("resultados.txt", "a");
+
+    if (archivo == NULL) {
+        printf("Error al abrir el archivo.\n");
+        return;
+    }
+
+    printf("\nHistorial de Números\n\n");
+    printf("| Número | Pale | Tripleta | Hora                |\n");
+    printf("|--------|------|----------|---------------------|\n");
+
+ for (int i = 0; i < cantidadNumeros; i++) {
+    printf("| %-6d |", numeros[i]);
+    if (numeros[i] >= 10 && numeros[i] <= 99) {
+        printf(" %-4d |", numeros[i]);
+    } else {
+        printf("      |");
+    }
+    if (numeros[i] >= 100 && numeros[i] <= 999) {
+        printf(" %-8d |", numeros[i]);
+    } else {
+        printf("          |");
+    }
+
+    time_t t;
+    time(&t);
+    struct tm *tm_info = localtime(&t);
+    printf(" %02d:%02d:%02d %02d/%02d/%d |\n", tm_info->tm_hour, tm_info->tm_min, tm_info->tm_sec,
+           tm_info->tm_mday, tm_info->tm_mon + 1, tm_info->tm_year + 1900);
+
+    fprintf(archivo, "%02d/%02d/%d\n", tm_info->tm_mday, tm_info->tm_mon + 1, tm_info->tm_year + 1900);
+    fprintf(archivo, "Hora actual: %02d:%02d:%02d\n", tm_info->tm_hour, tm_info->tm_min, tm_info->tm_sec);
+    fprintf(archivo, "Número: %d\n", numeros[i]);
+    fprintf(archivo, "---------------------------------\n");
+}
+
+    fclose(archivo);
+}
