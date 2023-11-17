@@ -4,23 +4,28 @@
 #include <string.h>
 #include <math.h>
 
+// Definición de constantes
 #define MAX_NUMEROS 1
 #define MAX_DIGITOS_PALE 2
 #define MAX_DIGITOS_TRIPLETA 3
 
+// Prototipos de funciones
 void jugar();
 void tirar(int numeros[], int *cantidadNumeros);
-void guardarEnArchivo(int numeros[], int cantidadNumeros, const char *tipoJuego);
+void guardarEnArchivo(int numero, const char *tipoJuego);
 void mostrarHistorial(int numeros[], int cantidadNumeros);
 
 int main() {
+    // Variables
     int opcion;
     int numeros[MAX_NUMEROS];
     int cantidadNumeros = 0;
 
+    // Inicialización del generador de números aleatorios
     srand(time(NULL));
 
     do {
+        // Menú principal
         printf("Menu\n\n");
         printf("0 - Salir\n");
         printf("1 - Tirar\n");
@@ -49,6 +54,10 @@ int main() {
 
     } while (opcion != 0);
 
+    // Mostrar historial al salir del programa
+    mostrarHistorial(numeros, cantidadNumeros);
+
+    // Mostrar resumen
     printf("\nResumen:\n");
     printf("Cantidad de numeros generados: %d\n", cantidadNumeros);
     printf("Numeros generados: ");
@@ -57,6 +66,7 @@ int main() {
     }
     printf("\n");
 
+    // Obtener fecha y hora actual
     time_t t;
     time(&t);
     struct tm *tm_info = localtime(&t);
@@ -67,15 +77,18 @@ int main() {
     return 0;
 }
 
+// Función para generar un número aleatorio y mostrarlo
 void tirar(int numeros[], int *cantidadNumeros) {
     printf("A ver que numero sale: %d\n", rand() % 99 + 1);
 }
 
+// Función para gestionar el juego
 void jugar() {
     int opcionJuego;
     int cantidadDigitos;
 
     do {
+        // Submenú de juego
         printf("\nSubmenu de Juego\n\n");
         printf("0 - Volver al menu principal\n");
         printf("1 - Numero (solo un digito)\n");
@@ -103,7 +116,6 @@ void jugar() {
                 break;
         }
     } while (cantidadDigitos == -1);
-
 
     int numeroUsuario;
     printf("Ingresa un numero de %d digito(s): ", cantidadDigitos);
@@ -142,12 +154,35 @@ void jugar() {
                 strcpy(tipoJuego, "Desconocido");
                 break;
         }
-void guardarEnArchivo(int numeros[], int cantidadNumeros, const char *tipoJuego);
+        guardarEnArchivo(numeroUsuario, tipoJuego);
     } else {
-        printf("Error: El número ingresado no tiene la cantidad correcta de digitos.\n");
+        printf("Error: El numero ingresado no tiene la cantidad correcta de digitos.\n");
     }
 }
 
+// Función para guardar el número jugado en un archivo
+void guardarEnArchivo(int numero, const char *tipoJuego) {
+    FILE *archivo;
+    archivo = fopen("resultados.txt", "a");
+
+    if (archivo == NULL) {
+        printf("Error al abrir el archivo.\n");
+        return;
+    }
+
+    time_t t;
+    time(&t);
+    struct tm *tm_info = localtime(&t);
+
+    fprintf(archivo, "%02d/%02d/%d\n", tm_info->tm_mday, tm_info->tm_mon + 1, tm_info->tm_year + 1900);
+    fprintf(archivo, "Hora actual: %02d:%02d:%02d\n", tm_info->tm_hour, tm_info->tm_min, tm_info->tm_sec);
+    fprintf(archivo, "%s: %d\n", tipoJuego, numero);
+    fprintf(archivo, "---------------------------------\n");
+
+    fclose(archivo);
+}
+
+// Función para mostrar el historial de números jugados
 void mostrarHistorial(int numeros[], int cantidadNumeros) {
     FILE *archivo;
     archivo = fopen("resultados.txt", "a");
@@ -157,34 +192,35 @@ void mostrarHistorial(int numeros[], int cantidadNumeros) {
         return;
     }
 
-    printf("\nHistorial de Números\n\n");
-    printf("| Número | Pale | Tripleta | Hora                |\n");
+    printf("\nHistorial de Numeros\n\n");
+    printf("| Numero | Pale | Tripleta | Hora                |\n");
     printf("|--------|------|----------|---------------------|\n");
 
- for (int i = 0; i < cantidadNumeros; i++) {
-    printf("| %-6d |", numeros[i]);
-    if (numeros[i] >= 10 && numeros[i] <= 99) {
-        printf(" %-4d |", numeros[i]);
-    } else {
-        printf("      |");
-    }
-    if (numeros[i] >= 100 && numeros[i] <= 999) {
-        printf(" %-8d |", numeros[i]);
-    } else {
-        printf("          |");
-    }
+    for (int i = 0; i < cantidadNumeros; i++) {
+        printf("| %-6d |", numeros[i]);
+        if (numeros[i] >= 10 && numeros[i] <= 99) {
+            printf(" %-4d |", numeros[i]);
+        } else {
+            printf("      |");
+        }
+        if (numeros[i] >= 100 && numeros[i] <= 999) {
+            printf(" %-8d |", numeros[i]);
+        } else {
+            printf("          |");
+        }
 
-    time_t t;
-    time(&t);
-    struct tm *tm_info = localtime(&t);
-    printf(" %02d:%02d:%02d %02d/%02d/%d |\n", tm_info->tm_hour, tm_info->tm_min, tm_info->tm_sec,
-           tm_info->tm_mday, tm_info->tm_mon + 1, tm_info->tm_year + 1900);
+        time_t t;
+        time(&t);
+        struct tm *tm_info = localtime(&t);
+        printf(" %02d:%02d:%02d %02d/%02d/%d |\n", tm_info->tm_hour, tm_info->tm_min, tm_info->tm_sec,
+               tm_info->tm_mday, tm_info->tm_mon + 1, tm_info->tm_year + 1900);
 
-    fprintf(archivo, "%02d/%02d/%d\n", tm_info->tm_mday, tm_info->tm_mon + 1, tm_info->tm_year + 1900);
-    fprintf(archivo, "Hora actual: %02d:%02d:%02d\n", tm_info->tm_hour, tm_info->tm_min, tm_info->tm_sec);
-    fprintf(archivo, "Número: %d\n", numeros[i]);
-    fprintf(archivo, "---------------------------------\n");
-}
+        fprintf(archivo, "%02d/%02d/%d\n", tm_info->tm_mday, tm_info->tm_mon + 1, tm_info->tm_year + 1900);
+        fprintf(archivo, "Hora actual: %02d:%02d:%02d\n", tm_info->tm_hour, tm_info->tm_min, tm_info->tm_sec);
+        fprintf(archivo, "Numero: %d\n", numeros[i]);
+        fprintf(archivo, "---------------------------------\n");
+    }
 
     fclose(archivo);
 }
+
